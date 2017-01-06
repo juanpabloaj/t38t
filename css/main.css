@@ -1,0 +1,22 @@
+body {
+  margin:0px;
+  background-color: #000;
+}
+
+#three-container {
+  width: 90%;
+  height: 90%;
+  margin: 0 auto;
+}
+
+#messages {
+  font-family:verdana;
+  width: 100%;
+  height: 100%;
+  color: #F9FBE7;
+  margin: 14px 22px;
+}
+
+.msg-p {
+  margin: 4px;
+}
