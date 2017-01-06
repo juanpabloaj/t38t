@@ -8,5 +8,5 @@ The render is made with Threejs and the collisions are detected by Tile38.
 
 Try open two browser windows, you will can see how the other sphere moves in the scene.
 
-[threejs]: http://threejs.org
-[tile38]: https://threejs.org/
+[threejs]: https://threejs.org/
+[tile38]: http://tile38.com

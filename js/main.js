@@ -120,6 +120,7 @@ function showCollition(data) {
 function showMessage(msg) {
   var msgBox = document.getElementsByClassName('log-history')[0];
   msgBox.innerHTML += new Date() + ": "+ msg + '<br />';
+  msgBox.scrollTop = msgBox.scrollHeight;
 }
 
 function showRocks(data) {
