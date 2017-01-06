@@ -96,7 +96,7 @@ function sendPosition() {
 function animate() {
   requestAnimationFrame(animate);
 
-  for (const rock of scene.children) {
+  for (rock of scene.children) {
     rock.rotation.y += 0.01;
   }
 
@@ -128,7 +128,7 @@ function showRocks(data) {
     wireframe: true
   });
 
-  for (const rock of data) {
+  for (rock of data) {
     var name = rock[0];
     var coor = JSON.parse(rock[1]).coordinates;
     var lat = coor[0];
@@ -148,7 +148,7 @@ function show_ships(data) {
     wireframe: true
   });
 
-  for (const ship of data) {
+  for (ship of data) {
     var name = ship[0];
     if ( name == shipName ) continue;
     var coor = JSON.parse(ship[1]).coordinates;
