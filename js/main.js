@@ -1,9 +1,9 @@
 var camera, scene;
 var MTS = 1e7;
 var PI = Math.PI;
-var ship_name;
+var shipName;
 var z0, x0;
-var socketLife;
+var lifeSocket;
 
 var tile38Host = "localhost";
 var tile38 = "ws://" + tile38Host+ ":9851";
@@ -20,48 +20,56 @@ function init() {
   scene = new THREE.Scene();
 
   renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth * 0.9, window.innerHeight * 0.86);
+  renderer.setSize(window.innerWidth * 0.9, window.innerHeight * 0.8);
 
   var container = document.getElementById("three-container");
   container.appendChild(renderer.domElement);
 
-  set_keys();
+  setKeys();
 
-  socketLife = new WebSocket(socketHost);
+  lifeSocket = new WebSocket(socketHost);
+  var collisionSocket = new WebSocket(socketHost);
 
-  socketLife.onopen = function (event) {
-    socketLife.send('');
+  lifeSocket.onopen = function (event) {
+    lifeSocket.send(JSON.stringify({message:"init"}));
+    lifeSocket.send(JSON.stringify({message:"scan rocks"}));
   }
 
-  socketLife.onmessage = function(event) {
-    var ship = JSON.parse(event.data);
-    var angle = ship.name;
-    var lat = Number(ship.lat);
-    var lng = Number(ship.lng);
-    ship_name = angle;
-    angle = Number(angle);
+  lifeSocket.onmessage = function(event) {
+    var data  = JSON.parse(event.data);
+    if ( data.message == "init" ) {
+      var angle = data.name;
+      var lat = Number(data.lat);
+      var lng = Number(data.lng);
+      shipName = angle;
+      angle = Number(angle);
 
-    camera.position.z = z0 = lng * MTS;
-    camera.position.x = x0 = lat * MTS;
-    camera.rotateY((90-angle) * PI /180);
+      camera.position.z = z0 = lng * MTS;
+      camera.position.x = x0 = lat * MTS;
+      camera.rotateY((90-angle) * PI /180);
 
-    show_msg_and_clear("Welcome ship" + ship_name, "");
+      showMessage("Welcome ship" + shipName);
 
-    show_rocks();
-    show_collition();
+      lifeSocket.send(JSON.stringify({
+        message:"show collitions", name: shipName
+      }));
 
-    setInterval(send_position, 500);
-    setInterval(show_ships, 500);
+      setInterval(sendPosition, 500);
+      setInterval(function(){
+        lifeSocket.send(JSON.stringify({message:"scan ships"}));
+      }, 500);
+    }
+    if (data.message == "rocks")
+      showRocks(data.data);
+    if (data.message == "ships")
+      show_ships(data.data);
+    if (data.message == "show collitions")
+      showCollition(data.data);
   }
 
 }
 
-// Mozilla developer network
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function set_keys() {
+function setKeys() {
   window.addEventListener('keydown', function(event) {
     switch (event.keyCode) {
       case 87: // w
@@ -80,10 +88,12 @@ function set_keys() {
   });
 }
 
-function send_position() {
+function sendPosition() {
   var lat = camera.position.x / MTS;
   var lng = camera.position.z / MTS;
-  socketLife.send(JSON.stringify({name:ship_name, lat:lat, lng:lng}));
+  lifeSocket.send(JSON.stringify({
+    message: "set position", name:shipName, lat:lat, lng:lng
+  }));
 }
 
 function animate() {
@@ -99,79 +109,65 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-function show_collition() {
-  var url =  tile38 + "/NEARBY+ships+match+"+ship_name+"+fence+roam+rocks+*+1";
-  var socket = new WebSocket(url);
-  socket.onmessage = function(event) {
-    var data = JSON.parse(event.data);
-    if (data.detect == 'roam') {
-      camera.position.x = x0;
-      camera.position.z = z0;
-      var msg = "Ship:" + ship_name + ": Collision with rock " + data.nearby.id + "!";
-      show_msg_and_clear(msg, "Restarted");
-    }
+function showCollition(data) {
+  var data = JSON.parse(data);
+  if (data.detect == 'roam') {
+    camera.position.x = x0;
+    camera.position.z = z0;
+    var msg = "Ship" + shipName + " collision with rock " + data.nearby.id + "!";
+    showMessage(msg);
+    showMessage("Restarted");
   }
 }
 
-function show_msg_and_clear(msg, clear_msg) {
-      var msg_box = document.getElementsByClassName('msg-p')[0];
-      msg_box.textContent = msg;
-      setTimeout(function() {
-        msg_box.textContent = clear_msg;
-      }, 2000);
+function showMessage(msg) {
+  var msgBox = document.getElementsByClassName('log-history')[0];
+  msgBox.innerHTML += new Date() + ": "+ msg + '<br />';
 }
 
-function show_rocks() {
+function showRocks(data) {
   var material = new THREE.MeshBasicMaterial({
     color: 0xF3E5F5,
     wireframe: true
   });
-  var socket = new WebSocket(tile38 + "/scan+rocks");
 
-  socket.onmessage = function(event) {
-    var data = JSON.parse(event.data);
-    for (const rock of data.objects) {
-      var name = rock.id;
-      var coor = rock.object.coordinates;
-      var lat = coor[0];
-      var lng = coor[1];
-      var geometry = new THREE.BoxGeometry(100, 400, 100);
-      var mesh_rock  = new THREE.Mesh(geometry, material);
-      mesh_rock.name = name;
-      mesh_rock.position.x = lat * MTS;
-      mesh_rock.position.z = lng * MTS;
-      scene.add(mesh_rock);
-    }
-  };
+  for (const rock of data) {
+    var name = rock[0];
+    var coor = JSON.parse(rock[1]).coordinates;
+    var lat = coor[0];
+    var lng = coor[1];
+    var geometry = new THREE.BoxGeometry(100, 400, 100);
+    var mesh_rock  = new THREE.Mesh(geometry, material);
+    mesh_rock.name = name;
+    mesh_rock.position.x = lat * MTS;
+    mesh_rock.position.z = lng * MTS;
+    scene.add(mesh_rock);
+  }
 }
 
-function show_ships() {
+function show_ships(data) {
   var material = new THREE.MeshBasicMaterial({
     color: 0xFF0000,
     wireframe: true
   });
-  var socket = new WebSocket(tile38 + "/scan+ships");
 
-  socket.onmessage = function(event) {
-    var data = JSON.parse(event.data);
-    for (const ship of data.objects) {
-      var name = ship.id;
-      if ( name == ship_name ) continue;
-      var coor = ship.object.coordinates;
-      var lat = coor[0] * MTS;
-      var lng = coor[1] * MTS;
-      var local_ship = scene.getObjectByName(name);
-      if (local_ship) {
-        local_ship.position.x = lat;
-        local_ship.position.z = lng;
-      } else {
-        var geometry = new THREE.SphereGeometry(20, 10, 4);
-        var mesh_ship  = new THREE.Mesh(geometry, material);
-        mesh_ship.name = name;
-        mesh_ship.position.x = lat;
-        mesh_ship.position.z = lng;
-        scene.add(mesh_ship);
-      }
+  for (const ship of data) {
+    var name = ship[0];
+    if ( name == shipName ) continue;
+    var coor = JSON.parse(ship[1]).coordinates;
+    var lat = coor[0] * MTS;
+    var lng = coor[1] * MTS;
+    var local_ship = scene.getObjectByName(name);
+    if (local_ship) {
+      local_ship.position.x = lat;
+      local_ship.position.z = lng;
+    } else {
+      var geometry = new THREE.SphereGeometry(20, 10, 4);
+      var mesh_ship  = new THREE.Mesh(geometry, material);
+      mesh_ship.name = name;
+      mesh_ship.position.x = lat;
+      mesh_ship.position.z = lng;
+      scene.add(mesh_ship);
     }
-  };
+  }
 }

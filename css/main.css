@@ -8,18 +8,20 @@ body {
 
 #three-container {
   width: 90%;
-  height: 86%;
+  height: 80%;
   margin: 0 auto;
 }
 
 #messages {
   width: 100%;
-  height: 34px;
+  height: 80px;
   margin: 12px 22px 0px 22px;
 }
 
-.msg-p {
+.log-history {
   margin: 4px;
+  height: 60px;
+  overflow-y: scroll;
 }
 
 footer {
