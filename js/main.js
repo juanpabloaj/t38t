@@ -20,7 +20,7 @@ function init() {
   scene = new THREE.Scene();
 
   renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth * 0.9, window.innerHeight * 0.9);
+  renderer.setSize(window.innerWidth * 0.9, window.innerHeight * 0.86);
 
   var container = document.getElementById("three-container");
   container.appendChild(renderer.domElement);
@@ -107,7 +107,7 @@ function show_collition() {
     if (data.detect == 'roam') {
       camera.position.x = x0;
       camera.position.z = z0;
-      var msg = "Ship:" + ship_name + ": Collision with " + data.nearby.id + " !!";
+      var msg = "Ship:" + ship_name + ": Collision with rock " + data.nearby.id + "!";
       show_msg_and_clear(msg, "Restarted");
     }
   }
