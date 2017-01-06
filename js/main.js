@@ -5,10 +5,7 @@ var shipName;
 var z0, x0;
 var lifeSocket;
 
-var tile38Host = "localhost";
-var tile38 = "ws://" + tile38Host+ ":9851";
-
-var socketHost = "localhost";
+var socketHost = "209.177.93.71";
 socketHost = "ws://" + socketHost + ":8080";
 
 init();
