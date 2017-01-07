@@ -70,6 +70,9 @@ function init() {
       setInterval(function(){
         lifeSocket.send(JSON.stringify({message:"scan ships"}));
       }, 500);
+      setInterval(function(){
+        lifeSocket.send(JSON.stringify({message:"scan rocks"}));
+      }, 2000);
     }
     if (data.message == "rocks")
       showRocks(data.data);
@@ -162,12 +165,20 @@ function showRocks(data) {
     var coor = JSON.parse(rock[1]).coordinates;
     var lat = coor[0];
     var lng = coor[1];
-    var geometry = new THREE.BoxGeometry(100, 400, 100);
-    var mesh_rock  = new THREE.Mesh(geometry, material);
-    mesh_rock.name = name;
-    mesh_rock.position.x = lat * MTS;
-    mesh_rock.position.z = lng * MTS;
-    scene.add(mesh_rock);
+
+    var local_rock = scene.getObjectByName(name);
+    if (local_rock) {
+      if ( local_rock.geometry.type == "SphereGeometry" ) {
+        scene.remove(local_rock);
+      }
+    } else {
+      var geometry = new THREE.BoxGeometry(100, 400, 100);
+      var mesh_rock  = new THREE.Mesh(geometry, material);
+      mesh_rock.name = name;
+      mesh_rock.position.x = lat * MTS;
+      mesh_rock.position.z = lng * MTS;
+      scene.add(mesh_rock);
+    }
   }
 }
 
