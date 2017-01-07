@@ -30,7 +30,7 @@ function init() {
   lifeSocket.onopen = function (event) {
     lifeSocket.send(JSON.stringify({message:"init"}));
     lifeSocket.send(JSON.stringify({message:"scan rocks"}));
-  }
+  };
 
   lifeSocket.onmessage = function(event) {
     var data  = JSON.parse(event.data);
@@ -50,6 +50,7 @@ function init() {
       lifeSocket.send(JSON.stringify({
         message:"show collitions", name: shipName
       }));
+      lifeSocket.send(JSON.stringify({message:"new ships"}));
 
       setInterval(sendPosition, 500);
       setInterval(function(){
@@ -59,10 +60,12 @@ function init() {
     if (data.message == "rocks")
       showRocks(data.data);
     if (data.message == "ships")
-      show_ships(data.data);
+      showShips(data.data);
     if (data.message == "show collitions")
       showCollition(data.data);
-  }
+    if (data.message == "new ships")
+      newShips(data.data);
+  };
 
 }
 
@@ -107,7 +110,7 @@ function animate() {
 }
 
 function showCollition(data) {
-  var data = JSON.parse(data);
+  data = JSON.parse(data);
   if (data.detect == 'roam') {
     camera.position.x = x0;
     camera.position.z = z0;
@@ -115,6 +118,10 @@ function showCollition(data) {
     showMessage(msg);
     showMessage("Restarted");
   }
+}
+
+function newShips(data) {
+  showMessage("Ship" + data.id + " detected");
 }
 
 function showMessage(msg) {
@@ -143,7 +150,7 @@ function showRocks(data) {
   }
 }
 
-function show_ships(data) {
+function showShips(data) {
   var material = new THREE.MeshBasicMaterial({
     color: 0xFF0000,
     wireframe: true
