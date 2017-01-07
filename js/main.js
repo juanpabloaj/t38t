@@ -172,28 +172,31 @@ function showRocks(data) {
 }
 
 function showShips(data) {
-  var material = new THREE.MeshBasicMaterial({
-    color: 0xFF0000,
-    wireframe: true
-  });
 
   for (ship of data) {
     var name = ship[0];
     if ( name == shipName ) continue;
+    var material = new THREE.MeshBasicMaterial({
+      color: COLORS[Number(name)],
+      wireframe: true
+    });
     var coor = JSON.parse(ship[1]).coordinates;
     var lat = coor[0] * MTS;
     var lng = coor[1] * MTS;
     var local_ship = scene.getObjectByName(name);
     if (local_ship) {
-      local_ship.position.x = lat;
-      local_ship.position.z = lng;
-    } else {
-      var geometry = new THREE.SphereGeometry(20, 10, 4);
-      var mesh_ship  = new THREE.Mesh(geometry, material);
-      mesh_ship.name = name;
-      mesh_ship.position.x = lat;
-      mesh_ship.position.z = lng;
-      scene.add(mesh_ship);
+      if (local_ship.geometry.type === "BoxGeometry") {
+        scene.remove(local_ship);
+        local_ship = false;
+      }
     }
+    if (!local_ship) {
+      var geometry = new THREE.SphereGeometry(30, 20, 10);
+      local_ship = new THREE.Mesh(geometry, material);
+      local_ship.name = name;
+      scene.add(local_ship);
+    }
+    local_ship.position.x = lat;
+    local_ship.position.z = lng;
   }
 }
