@@ -73,14 +73,19 @@ function init() {
       setInterval(function(){
         lifeSocket.send(JSON.stringify({message:"scan rocks"}));
       }, 2000);
+      setInterval(function(){
+        lifeSocket.send(JSON.stringify({message:"scan bullets"}));
+      }, 1000);
     }
-    if (data.message == "rocks")
+    if (data.message === "rocks")
       showRocks(data.data);
-    if (data.message == "ships")
+    if (data.message === "ships")
       showShips(data.data);
-    if (data.message == "show collitions")
+    if (data.message === "bullets")
+      showBullets(data.data);
+    if (data.message === "show collitions")
       showCollition(data.data);
-    if (data.message == "new ships")
+    if (data.message === "new ships")
       newShips(data.data);
   };
 
@@ -99,7 +104,12 @@ function setKeys() {
       case 68: // d
         camera.rotateY(-5*PI/180);
         break;
-      case 32: // space
+      case 81: // q
+        lifeSocket.send(JSON.stringify({
+          message: "bullet",
+          direction: camera.getWorldDirection(),
+          position: {x: camera.position.x/MTS, z: camera.position.z/MTS}
+        }));
         break;
     }
   });
@@ -128,11 +138,15 @@ function animate() {
 
 function showCollition(data) {
   data = JSON.parse(data);
-  if (data.detect == 'roam') {
+  if (data.detect === 'roam') {
     camera.position.x = x0;
     camera.position.z = z0;
-    var msg = "Ship" + shipName + " collision with rock " + data.nearby.id + "!";
-    showMessage(msg);
+    if(data.nearby.key === 'rocks') {
+      var msg = "Ship" + shipName + " collision with rock " + data.nearby.id + "!";
+      showMessage(msg);
+    }
+    if(data.nearby.key === 'bullets')
+      showColorMessage('You are die by a bullet!', '#ff0000');
     showMessage("Restarted");
   }
 }
@@ -209,5 +223,27 @@ function showShips(data) {
     }
     local_ship.position.x = lat;
     local_ship.position.z = lng;
+  }
+}
+
+function showBullets(data) {
+  for (var bullet of data) {
+    var name = bullet[0];
+    var material = new THREE.MeshBasicMaterial({
+      color: "#FF0000",
+      wireframe: true
+    });
+    var coor = JSON.parse(bullet[1]).coordinates;
+    var lat = coor[0] * MTS;
+    var lng = coor[1] * MTS;
+    var local_bullet = scene.getObjectByName(name);
+    if (!local_bullet) {
+      var geometry = new THREE.SphereGeometry(10, 10, 5);
+      local_bullet = new THREE.Mesh(geometry, material);
+      scene.add(local_bullet);
+    }
+    local_bullet.name = name;
+    local_bullet.position.x = lat;
+    local_bullet.position.z = lng;
   }
 }
