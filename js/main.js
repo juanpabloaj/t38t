@@ -31,7 +31,7 @@ function init() {
   scene = new THREE.Scene();
 
   renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth * 0.9, window.innerHeight * 0.8);
+  renderer.setSize(window.innerWidth * 0.9, window.innerHeight * 0.76);
 
   var container = document.getElementById("three-container");
   container.appendChild(renderer.domElement);

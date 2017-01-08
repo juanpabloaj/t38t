@@ -1,12 +1,11 @@
 # T38T client
 
-Multiplayer [Threejs][threejs] scene over [Tile38][tile38].
+Simple 3D multiplayer online.
 
-Move in the scene with the keys `a` and `d`.
+Keyboard: a: left, d: right, q: shoot.
 
-The render is made with Threejs and the collisions are detected by Tile38.
-
-Try open two browser windows, you will can see how the other sphere moves in the scene.
+Each connected browser or new window of the browser is a new player.
+[Threejs][threejs] make the 3D render and [Tile38][tile38] storage the positions and detect the collisions.
 
 [threejs]: https://threejs.org/
 [tile38]: http://tile38.com
