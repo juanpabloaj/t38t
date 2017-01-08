@@ -240,10 +240,18 @@ function showBullets(data) {
     if (!local_bullet) {
       var geometry = new THREE.SphereGeometry(10, 10, 5);
       local_bullet = new THREE.Mesh(geometry, material);
+      local_bullet.name = name;
       scene.add(local_bullet);
+      removeByName(name, 8000);
     }
-    local_bullet.name = name;
     local_bullet.position.x = lat;
     local_bullet.position.z = lng;
   }
+}
+
+function removeByName(name, time) {
+  var to_remove = scene.getObjectByName(name);
+  setTimeout(function() {
+    scene.remove(to_remove);
+  }, time);
 }
