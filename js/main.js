@@ -128,6 +128,11 @@ function animate() {
 
   for (var rock of scene.children) {
     rock.rotation.y += 0.01;
+
+    if (!rock.up.y) {
+      rock.position.add( rock.up.multiplyScalar(1.055) );
+    }
+
   }
 
   var direction = camera.getWorldDirection();
@@ -229,20 +234,31 @@ function showShips(data) {
 function showBullets(data) {
   for (var bullet of data) {
     var name = bullet[0];
+
     var material = new THREE.MeshBasicMaterial({
       color: "#FF0000",
       wireframe: true
     });
+
     var coor = JSON.parse(bullet[1]).coordinates;
     var lat = coor[0] * MTS;
     var lng = coor[1] * MTS;
     var local_bullet = scene.getObjectByName(name);
+
     if (!local_bullet) {
       var geometry = new THREE.SphereGeometry(10, 10, 5);
       local_bullet = new THREE.Mesh(geometry, material);
       local_bullet.name = name;
       scene.add(local_bullet);
       removeByName(name, 8000);
+
+      if ( bullet[2] ) {
+        var latDirection = bullet[2][1];
+        var lngDirection = bullet[2][3];
+        local_bullet.up.x = latDirection;
+        local_bullet.up.z = lngDirection;
+        local_bullet.up.y = 0;
+      }
     }
     local_bullet.position.x = lat;
     local_bullet.position.z = lng;
