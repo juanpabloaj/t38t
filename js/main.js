@@ -127,12 +127,11 @@ function animate() {
   requestAnimationFrame(animate);
 
   for (var rock of scene.children) {
-    rock.rotation.y += 0.01;
 
     if (!rock.up.y) {
       rock.position.add( rock.up.multiplyScalar(1.055) );
-    }
-
+    } else
+      rock.rotation.y += 0.01;
   }
 
   var direction = camera.getWorldDirection();
@@ -187,7 +186,7 @@ function showRocks(data) {
 
     var local_rock = scene.getObjectByName(name);
     if (local_rock) {
-      if ( local_rock.geometry.type == "SphereGeometry" ) {
+      if ( local_rock.geometry.type === "SphereGeometry" ) {
         scene.remove(local_rock);
       }
     } else {
@@ -246,7 +245,7 @@ function showBullets(data) {
     var local_bullet = scene.getObjectByName(name);
 
     if (!local_bullet) {
-      var geometry = new THREE.SphereGeometry(10, 10, 5);
+      var geometry = new THREE.CylinderGeometry(2, 2, 16, 10);
       local_bullet = new THREE.Mesh(geometry, material);
       local_bullet.name = name;
       scene.add(local_bullet);
@@ -258,6 +257,10 @@ function showBullets(data) {
         local_bullet.up.x = latDirection;
         local_bullet.up.z = lngDirection;
         local_bullet.up.y = 0;
+        local_bullet.quaternion.setFromUnitVectors(
+          new THREE.Vector3(0, 1, 0),
+          new THREE.Vector3(latDirection, 0, lngDirection)
+        );
       }
     }
     local_bullet.position.x = lat;
