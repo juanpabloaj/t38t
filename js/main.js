@@ -59,6 +59,7 @@ function init() {
       camera.position.x = x0 = lat * MTS;
       camera.rotateY((90-angle) * PI /180);
 
+      showColorMessage(getQuote(), COLORS[angle]);
       showColorMessage("Welcome ship" + shipName, COLORS[angle]);
 
       lifeSocket.send(JSON.stringify({
