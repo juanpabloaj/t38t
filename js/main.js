@@ -30,6 +30,9 @@ function init() {
 
   scene = new THREE.Scene();
 
+  var light = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(light);
+
   renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth * 0.9, window.innerHeight * 0.76);
 
@@ -130,7 +133,9 @@ function animate() {
   for (var rock of scene.children) {
 
     if (!rock.up.y) {
+      var pointLight = scene.getObjectByName('pl' + rock.name);
       rock.position.add( rock.up.multiplyScalar(1.055) );
+      pointLight.position.add( rock.up.multiplyScalar(1.055) );
     } else
       rock.rotation.y += 0.01;
   }
@@ -174,9 +179,9 @@ function showColorMessage(msg, color) {
 }
 
 function showRocks(data) {
-  var material = new THREE.MeshBasicMaterial({
+  var material = new THREE.MeshLambertMaterial({
     color: 0xF3E5F5,
-    wireframe: true
+    transparent: true, opacity: 0.5
   });
 
   for (var rock of data) {
@@ -232,6 +237,8 @@ function showShips(data) {
 }
 
 function showBullets(data) {
+  var timeLife= 8000;
+
   for (var bullet of data) {
     var name = bullet[0];
 
@@ -250,7 +257,7 @@ function showBullets(data) {
       local_bullet = new THREE.Mesh(geometry, material);
       local_bullet.name = name;
       scene.add(local_bullet);
-      removeByName(name, 8000);
+      removeByName(name, timeLife);
 
       if ( bullet[2] ) {
         var latDirection = bullet[2][1];
@@ -264,8 +271,20 @@ function showBullets(data) {
         );
       }
     }
+
+    var pointLightName = 'pl' + name;
+    var pointLight = scene.getObjectByName(pointLightName);
+
+    if ( !pointLight ) {
+      var pointLight = new THREE.PointLight(0xff0000, 1, 2000);
+      pointLight.name = pointLightName;
+      scene.add( pointLight );
+      removeByName(pointLightName, timeLife);
+    }
+
     local_bullet.position.x = lat;
     local_bullet.position.z = lng;
+    pointLight.position.set(lat, 0, lng);
   }
 }
 
