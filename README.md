@@ -1,6 +1,6 @@
 # T38T client
 
-![Imgur](http://i.imgur.com/xRBRMEc.gif)
+![t38t](http://i.imgur.com/KrMZVTf.gif)
 
 Simple 3D multiplayer online.
 
