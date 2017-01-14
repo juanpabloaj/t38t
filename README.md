@@ -1,5 +1,7 @@
 # T38T client
 
+![Imgur](http://i.imgur.com/xRBRMEc.gif)
+
 Simple 3D multiplayer online.
 
 Keyboard: a: left, d: right, q: shoot.
